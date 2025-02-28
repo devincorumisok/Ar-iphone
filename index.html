@@ -9,16 +9,21 @@
 <body>
     <h1>3D Mapping with Bluetooth and AR</h1>
     
-    <!-- Button to Connect to Bluetooth Device -->
-    <button id="connectButton">Connect to Bluetooth Device</button>
+    <!-- Control Buttons -->
+    <div class="controls">
+        <button id="startButton">Start Scanning</button>
+        <button id="stopButton" disabled>Stop Scanning</button>
+        <button id="downloadButton" disabled>Download 3D Model</button>
+    </div>
     
-    <!-- Canvas for Three.js 3D Rendering -->
+    <!-- Canvas for 3D Rendering -->
     <div id="ar-container">
         <canvas id="three-canvas"></canvas>
     </div>
     
-    <!-- Load Three.js and the App Script -->
+    <!-- Load Three.js and OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
