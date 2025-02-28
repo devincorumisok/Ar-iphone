@@ -37,3 +37,21 @@ canvas {
     height: 100%;
     display: block;
 }
+
+/* Camera Preview */
+#camera-view {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 200px;
+    height: 120px;
+    border: 2px solid white;
+    background-color: black;
+    z-index: 10;
+}
+
+#camera-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
