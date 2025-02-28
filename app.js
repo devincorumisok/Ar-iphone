@@ -2,6 +2,7 @@
 const startButton = document.getElementById('startButton');
 const stopButton = document.getElementById('stopButton');
 const downloadButton = document.getElementById('downloadButton');
+const cameraFeed = document.getElementById('camera-feed');
 const canvas = document.getElementById('three-canvas');
 
 // Initialize Three.js Scene
@@ -9,7 +10,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x333333, 1); // Set a dark grey background
+renderer.setClearColor(0x333333, 1); // Dark grey background
 
 // Add Lighting
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -19,19 +20,22 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(10, 10, 10).normalize();
 scene.add(directionalLight);
 
-// Add Grid Helper to visualize space
+// Add Grid Helper
 const gridHelper = new THREE.GridHelper(50, 50);
 scene.add(gridHelper);
 
-// Add Orbit Controls for camera interaction
+// Orbit Controls for Camera Interaction
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.enableZoom = true;
 
-// Position the camera
+// Position the Camera
 camera.position.set(10, 10, 20);
 controls.update();
+
+// 3D Object Collection
+const objects = [];
 
 // Render Loop
 function animate() {
@@ -41,36 +45,33 @@ function animate() {
 }
 animate();
 
-// Bluetooth Variables
+// Bluetooth & WiFi Variables
 let device;
 let scanning = false;
 
-// 3D Object Collection
-const objects = [];
-
-// Start Scanning for Bluetooth Devices
+// Start Scanning
 async function startScanning() {
+    startButton.disabled = true;
+    stopButton.disabled = false;
+
+    // Initialize Camera Feed
+    startCamera();
+
+    // Simulate Bluetooth Scanning
     try {
         device = await navigator.bluetooth.requestDevice({
             filters: [{ namePrefix: 'BLE' }],
             optionalServices: ['battery_service']
         });
-
         console.log('Connected to:', device.name);
-
         scanning = true;
-        startButton.disabled = true;
-        stopButton.disabled = false;
-
-        // Add Random Spheres (Mocking Bluetooth Data)
-        addRandomSpheres();
-
+        addRandomSpheres(); // Simulated 3D Mapping
     } catch (error) {
         console.error('Bluetooth connection failed:', error);
     }
 }
 
-// Stop Scanning and Process Data
+// Stop Scanning
 function stopScanning() {
     if (device && scanning) {
         console.log('Stopped scanning.');
@@ -78,10 +79,31 @@ function stopScanning() {
         startButton.disabled = false;
         stopButton.disabled = true;
         downloadButton.disabled = false;
+        stopCamera();
     }
 }
 
-// Generate Random 3D Spheres (Simulating Bluetooth Data)
+// Initialize Camera Stream
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        cameraFeed.srcObject = stream;
+    } catch (error) {
+        console.error('Camera access denied:', error);
+    }
+}
+
+// Stop Camera Stream
+function stopCamera() {
+    const stream = cameraFeed.srcObject;
+    if (stream) {
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+        cameraFeed.srcObject = null;
+    }
+}
+
+// Generate Random 3D Spheres (Simulating Bluetooth/WiFi Data)
 function addRandomSpheres() {
     clearScene();
 
@@ -107,7 +129,7 @@ function clearScene() {
     objects.length = 0;
 }
 
-// Download the 3D Model as an OBJ File
+// Download 3D Model as OBJ File
 function downloadModel() {
     const exporter = new THREE.OBJExporter();
     const objData = exporter.parse(scene);
