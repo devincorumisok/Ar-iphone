@@ -3,24 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Mapping with Bluetooth and AR</title>
+    <title>AR 3D Mapping with WiFi & Bluetooth</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>3D Mapping with Bluetooth and AR</h1>
-    
+    <h1>AR 3D Mapping with WiFi & Bluetooth</h1>
+
     <!-- Control Buttons -->
     <div class="controls">
         <button id="startButton">Start Scanning</button>
         <button id="stopButton" disabled>Stop Scanning</button>
         <button id="downloadButton" disabled>Download 3D Model</button>
     </div>
-    
+
+    <!-- Camera Preview (Top-Left) -->
+    <div id="camera-view">
+        <video id="camera-feed" autoplay></video>
+    </div>
+
     <!-- Canvas for 3D Rendering -->
     <div id="ar-container">
         <canvas id="three-canvas"></canvas>
     </div>
-    
+
     <!-- Load Three.js and OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
