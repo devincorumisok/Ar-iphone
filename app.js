@@ -2,7 +2,8 @@
 const startButton = document.getElementById('startButton');
 const stopButton = document.getElementById('stopButton');
 const downloadButton = document.getElementById('downloadButton');
-const toggleCameraButton = document.getElementById('toggleCameraButton');
+const statusMessage = document.getElementById('status-message');
+const statusText = document.getElementById('status-text');
 const cameraFeed = document.getElementById('camera-feed');
 const canvas = document.getElementById('three-canvas');
 
@@ -50,7 +51,7 @@ animate();
 let device;
 let scanning = false;
 
-// Camera Device (Back/Front Toggle)
+// Camera Device (Back Camera)
 let currentCamera = 'back'; // Default camera is back
 
 // Start Scanning
@@ -58,10 +59,12 @@ async function startScanning() {
     startButton.disabled = true;
     stopButton.disabled = false;
 
+    updateStatus('Initializing camera and starting scan...');
+
     // Initialize Camera Feed
     startCamera();
 
-    // Simulate Bluetooth Scanning
+    // Simulate Bluetooth/WiFi Scanning
     try {
         device = await navigator.bluetooth.requestDevice({
             filters: [{ namePrefix: 'BLE' }],
@@ -69,9 +72,17 @@ async function startScanning() {
         });
         console.log('Connected to:', device.name);
         scanning = true;
-        addRandomSpheres(); // Simulated 3D Mapping
+        updateStatus('Scanning started. Please scan the floor or a flat surface for at least 5 seconds.');
+
+        setTimeout(() => {
+            if (scanning) {
+                addRandomSpheres(); // Simulated 3D Mapping
+                updateStatus('3D modeling started.');
+            }
+        }, 5000); // Wait 5 seconds before starting the 3D modeling.
     } catch (error) {
         console.error('Bluetooth connection failed:', error);
+        updateStatus('Error: Could not connect to Bluetooth device.');
     }
 }
 
@@ -83,22 +94,26 @@ function stopScanning() {
         startButton.disabled = false;
         stopButton.disabled = true;
         downloadButton.disabled = false;
+        updateStatus('Scan stopped.');
         stopCamera();
     }
 }
 
-// Initialize Camera Stream (Front/Back)
+// Initialize Camera Stream (Always use Back Camera)
 async function startCamera() {
     try {
         const constraints = {
             video: {
-                facingMode: currentCamera === 'back' ? 'environment' : 'user', // Toggle between front and back camera
+                facingMode: 'environment', // Always use back camera
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
             },
         };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         cameraFeed.srcObject = stream;
     } catch (error) {
         console.error('Camera access denied:', error);
+        updateStatus('Error: Camera access denied or low light detected.');
     }
 }
 
@@ -112,11 +127,17 @@ function stopCamera() {
     }
 }
 
-// Toggle Between Front and Back Camera
-function toggleCamera() {
-    currentCamera = currentCamera === 'back' ? 'front' : 'back';
-    stopCamera();
-    startCamera();
+// Simulate Surface Detection
+function simulateSurfaceDetection() {
+    // Check if the camera is seeing a flat surface (for now, simulate the check)
+    const surfaceDetected = true; // Simulate a surface detection. Set to false to simulate low light.
+    
+    if (!surfaceDetected) {
+        updateStatus('Error: Low light or no flat surface detected. Please scan a flat surface like a table or floor.');
+        return false;
+    }
+
+    return true;
 }
 
 // Generate Random 3D Spheres (Simulating Bluetooth/WiFi Data)
@@ -161,8 +182,16 @@ function downloadModel() {
     URL.revokeObjectURL(url);
 }
 
+// Update Status Text
+function updateStatus(message) {
+    statusText.textContent = message;
+}
+
 // Event Listeners
-startButton.addEventListener('click', startScanning);
+startButton.addEventListener('click', () => {
+    if (simulateSurfaceDetection()) {
+        startScanning();
+    }
+});
 stopButton.addEventListener('click', stopScanning);
 downloadButton.addEventListener('click', downloadModel);
-toggleCameraButton.addEventListener('click', toggleCamera);
