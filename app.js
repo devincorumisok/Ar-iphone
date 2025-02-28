@@ -2,6 +2,7 @@
 const startButton = document.getElementById('startButton');
 const stopButton = document.getElementById('stopButton');
 const downloadButton = document.getElementById('downloadButton');
+const toggleCameraButton = document.getElementById('toggleCameraButton');
 const cameraFeed = document.getElementById('camera-feed');
 const canvas = document.getElementById('three-canvas');
 
@@ -49,6 +50,9 @@ animate();
 let device;
 let scanning = false;
 
+// Camera Device (Back/Front Toggle)
+let currentCamera = 'back'; // Default camera is back
+
 // Start Scanning
 async function startScanning() {
     startButton.disabled = true;
@@ -83,10 +87,15 @@ function stopScanning() {
     }
 }
 
-// Initialize Camera Stream
+// Initialize Camera Stream (Front/Back)
 async function startCamera() {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const constraints = {
+            video: {
+                facingMode: currentCamera === 'back' ? 'environment' : 'user', // Toggle between front and back camera
+            },
+        };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         cameraFeed.srcObject = stream;
     } catch (error) {
         console.error('Camera access denied:', error);
@@ -101,6 +110,13 @@ function stopCamera() {
         tracks.forEach(track => track.stop());
         cameraFeed.srcObject = null;
     }
+}
+
+// Toggle Between Front and Back Camera
+function toggleCamera() {
+    currentCamera = currentCamera === 'back' ? 'front' : 'back';
+    stopCamera();
+    startCamera();
 }
 
 // Generate Random 3D Spheres (Simulating Bluetooth/WiFi Data)
@@ -149,3 +165,4 @@ function downloadModel() {
 startButton.addEventListener('click', startScanning);
 stopButton.addEventListener('click', stopScanning);
 downloadButton.addEventListener('click', downloadModel);
+toggleCameraButton.addEventListener('click', toggleCamera);
