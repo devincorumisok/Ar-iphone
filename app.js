@@ -7,6 +7,11 @@ const statusText = document.getElementById('status-text');
 const cameraFeed = document.getElementById('camera-feed');
 const canvas = document.getElementById('three-canvas');
 
+// Toggles for AR, WiFi, and Bluetooth
+const arToggle = document.getElementById('arToggle');
+const wifiToggle = document.getElementById('wifiToggle');
+const bluetoothToggle = document.getElementById('bluetoothToggle');
+
 // Initialize Three.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -64,25 +69,40 @@ async function startScanning() {
     // Initialize Camera Feed
     startCamera();
 
-    // Simulate Bluetooth/WiFi Scanning
-    try {
-        device = await navigator.bluetooth.requestDevice({
-            filters: [{ namePrefix: 'BLE' }],
-            optionalServices: ['battery_service']
-        });
-        console.log('Connected to:', device.name);
-        scanning = true;
-        updateStatus('Scanning started. Please scan the floor or a flat surface for at least 5 seconds.');
+    // Handle AR, WiFi, and Bluetooth based on toggles
+    if (arToggle.checked) {
+        updateStatus('AR is enabled. Scanning for surfaces...');
+        simulateSurfaceDetection();  // Simulating flat surface detection
 
+        // Wait for 5 seconds before starting the 3D model generation
         setTimeout(() => {
             if (scanning) {
                 addRandomSpheres(); // Simulated 3D Mapping
                 updateStatus('3D modeling started.');
             }
-        }, 5000); // Wait 5 seconds before starting the 3D modeling.
-    } catch (error) {
-        console.error('Bluetooth connection failed:', error);
-        updateStatus('Error: Could not connect to Bluetooth device.');
+        }, 5000); // Wait 5 seconds before starting 3D modeling.
+    } else {
+        updateStatus('AR is not enabled. Please enable it to start scanning.');
+    }
+
+    if (wifiToggle.checked) {
+        console.log("WiFi is enabled.");
+        // Implement WiFi scanning logic here if needed.
+    }
+
+    if (bluetoothToggle.checked) {
+        try {
+            device = await navigator.bluetooth.requestDevice({
+                filters: [{ namePrefix: 'BLE' }],
+                optionalServices: ['battery_service']
+            });
+            console.log('Connected to:', device.name);
+            scanning = true;
+            updateStatus('Bluetooth connected.');
+        } catch (error) {
+            console.error('Bluetooth connection failed:', error);
+            updateStatus('Error: Could not connect to Bluetooth device.');
+        }
     }
 }
 
@@ -129,8 +149,7 @@ function stopCamera() {
 
 // Simulate Surface Detection
 function simulateSurfaceDetection() {
-    // Check if the camera is seeing a flat surface (for now, simulate the check)
-    const surfaceDetected = true; // Simulate a surface detection. Set to false to simulate low light.
+    const surfaceDetected = true; // Simulate a flat surface detection. Can be false to simulate no surface.
     
     if (!surfaceDetected) {
         updateStatus('Error: Low light or no flat surface detected. Please scan a flat surface like a table or floor.');
@@ -188,10 +207,6 @@ function updateStatus(message) {
 }
 
 // Event Listeners
-startButton.addEventListener('click', () => {
-    if (simulateSurfaceDetection()) {
-        startScanning();
-    }
-});
+startButton.addEventListener('click', startScanning);
 stopButton.addEventListener('click', stopScanning);
 downloadButton.addEventListener('click', downloadModel);
